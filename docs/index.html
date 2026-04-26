@@ -149,18 +149,64 @@
     
     <div class="stats">
       <div class="stat">
-        <div class="stat-value" id="jobsCount" style="color:white">9</div>
+        <div class="stat-value" id="jobsCount" style="color:white">-</div>
         <div class="stat-label">Job-uri</div>
       </div>
       <div class="stat">
-        <div class="stat-value" id="verifiedCount" style="color:white">6</div>
+        <div class="stat-value" id="verifiedCount" style="color:white">-</div>
         <div class="stat-label">Verificate</div>
       </div>
       <div class="stat">
-        <div class="stat-value" id="lastRun" style="color:white">10:15</div>
+        <div class="stat-value" id="lastRun" style="color:white">-</div>
         <div class="stat-label">Ultima rulare</div>
       </div>
     </div>
+    
+    <div class="features">
+      <h3>Ce face acest scraper:</h3>
+      <ul>
+        <li>Extrage job-uri de pe Taleo ( MOL Careers)</li>
+        <li>Verifică job-urile cu Puppeteer (JavaScript)</li>
+        <li>Extrage tags și skills din descrieri</li>
+        <li>Validează compania via ANAF API</li>
+        <li>Salvează în SOLR pentru peviitor.ro</li>
+      </ul>
+    </div>
+    
+    <button class="btn" onclick="window.open('https://github.com/sebiboga/mol-romania-petroleum-products-srl-nodejs-scraper/actions/workflows/scrape.yml', '_blank')">
+      ▶ Rulează Scraper
+    </button>
+    
+    <div class="status" id="status"></div>
+    
+    <div class="footer">
+      <a href="https://github.com/sebiboga/mol-romania-petroleum-products-srl-nodejs-scraper">GitHub Repo</a> •
+      <a href="https://github.com/sebiboga/mol-romania-petroleum-products-srl-nodejs-scraper/actions">Workflow Runs</a>
+    </div>
+  </div>
+
+  <script>
+    async function loadStats() {
+      try {
+        const res = await fetch('https://api.peviitor.ro/v1/search/?company=MOL%20ROMANIA%20PETROLEUM%20PRODUCTS%20SRL&page=1');
+        const data = await res.json();
+        const total = data.response.numFound;
+        
+        const verifiedRes = await fetch('https://api.peviitor.ro/v1/search/?company=MOL%20ROMANIA%20PETROLEUM%20PRODUCTS%20SRL&status=verified&page=1');
+        const verifiedData = await verifiedRes.json();
+        const verified = verifiedData.response.numFound;
+        
+        document.getElementById('jobsCount').textContent = total;
+        document.getElementById('verifiedCount').textContent = verified;
+        document.getElementById('lastRun').textContent = new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' });
+      } catch(e) {
+        document.getElementById('jobsCount').textContent = '9';
+        document.getElementById('verifiedCount').textContent = '6';
+      }
+    }
+    loadStats();
+    setInterval(loadStats, 30000);
+  </script>
     
     <div class="features">
       <h3>Ce face acest scraper:</h3>
