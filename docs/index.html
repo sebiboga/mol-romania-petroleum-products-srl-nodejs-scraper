@@ -149,15 +149,15 @@
     
     <div class="stats">
       <div class="stat">
-        <div class="stat-value" id="jobsCount">-</div>
+        <div class="stat-value" id="jobsCount" style="color:white">9</div>
         <div class="stat-label">Job-uri</div>
       </div>
       <div class="stat">
-        <div class="stat-value" id="verifiedCount">-</div>
+        <div class="stat-value" id="verifiedCount" style="color:white">6</div>
         <div class="stat-label">Verificate</div>
       </div>
       <div class="stat">
-        <div class="stat-value" id="lastRun">-</div>
+        <div class="stat-value" id="lastRun" style="color:white">10:15</div>
         <div class="stat-label">Ultima rulare</div>
       </div>
     </div>
@@ -185,11 +185,6 @@
     </div>
   </div>
 
-  <script>
-    // Static values - updated from SOLR
-    document.getElementById('jobsCount').textContent = '9';
-    document.getElementById('verifiedCount').textContent = '6';
-    document.getElementById('lastRun').textContent = new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' });
-  </script>
+  
 </body>
 </html>
