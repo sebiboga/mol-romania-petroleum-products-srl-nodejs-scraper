@@ -39,7 +39,7 @@
     }
     .stat-value { font-size: 2.5em; font-weight: bold; }
     .stat-label { font-size: 0.8em; opacity: 0.9; }
-    .stat-time { font-size: 0.65em; opacity: 0.7; margin-top: 2px; }
+    .stat-value-small { font-size: 0.9em; opacity: 0.8; margin-top: 5px; }
     .features {
       background: #f8f9fa; border-radius: 10px; padding: 20px; margin: 20px 0;
     }
@@ -80,8 +80,8 @@
         <div class="stat-label">Verificate</div>
       </div>
       <div class="stat">
-        <div class="stat-value" id="lastRun">-</div>
-        <div class="stat-time">Actualizat</div>
+        <div class="stat-label" id="lastRunLabel">Actualizat</div>
+        <div class="stat-value-small" id="lastRun">-</div>
       </div>
     </div>
     
@@ -133,7 +133,7 @@
         const vData = await vRes.json();
         document.getElementById('verifiedCount').textContent = vData.response.numFound;
         
-        document.getElementById('lastRun').textContent = new Date().toLocaleString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        document.getElementById('lastRun').textContent = new Date().toLocaleString('ro-RO', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
         
         // Load jobs list
         const jobsList = document.getElementById('jobsListContent');
@@ -146,7 +146,7 @@
       } catch(e) {
         document.getElementById('jobsCount').textContent = '9';
         document.getElementById('verifiedCount').textContent = '9';
-        document.getElementById('lastRun').textContent = new Date().toLocaleString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        document.getElementById('lastRun').textContent = new Date().toLocaleString('ro-RO', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
       }
     }
     loadStats();
