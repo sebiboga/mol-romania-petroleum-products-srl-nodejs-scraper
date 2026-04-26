@@ -2,8 +2,9 @@ name: WebScraper MOL to Peviitor
 
 on:
   schedule:
-    - cron: '0 6 * * *'
+    - cron: '0 * * * *'
   workflow_dispatch:
+  repository_dispatch:
 
 jobs:
   scrape:
