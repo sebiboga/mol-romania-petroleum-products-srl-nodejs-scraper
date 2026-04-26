@@ -30,7 +30,10 @@ jobs:
           sudo apt-get install -y google-chrome-stable || sudo apt-get install -y chromium-browser
           
       - name: Run scraper
-        run: npm run scrape
+        run: |
+          echo "Auth length: ${#SOLR_AUTH}"
+          echo "Auth first 10 chars: ${SOLR_AUTH:0:10}"
+          npm run scrape
         env:
           SOLR_AUTH: ${{ secrets.SOLR_AUTH }}
           
