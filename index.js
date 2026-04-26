@@ -11,6 +11,7 @@
 import fetch from "node-fetch";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import puppeteer from "puppeteer";
 import { validateAndGetCompany } from "./company.js";
 import { querySOLR, deleteJobByUrl, upsertJobs } from "./solr.js";
 
@@ -33,7 +34,7 @@ const SKILL_KEYWORDS = [
   'html', 'css', 'sass', 'less', 'bootstrap', 'tailwind',
   'rest', 'api', 'graphql', 'microservices', 'spring', 'django', 'flask', 'fastapi',
   'power bi', 'tableau', 'excel', 'statistics', 'analytics', 'etl', 'data warehouse',
-  'sap', 'erp', 'crm', 'salesforce', ' dynamics',
+  'sap', 'erp', 'crm', 'salesforce', 'dynamics',
   'project management', 'leadership', 'team management', 'communication',
   'english', 'german', 'french', 'hungarian', 'romanian',
   'supply chain', 'logistics', 'procurement', 'planning', 'forecasting',
@@ -41,43 +42,90 @@ const SKILL_KEYWORDS = [
   'marketing', 'sales', 'retail', 'business development',
   'hr', 'human resources', 'recruitment', 'training',
   'security', 'compliance', 'risk management',
-  'bachelor', 'master', 'mba', 'education'
+  'bachelor', 'master', 'mba', 'education',
+  'internship', 'trainee', 'student', 'junior', 'senior',
+  'planning', 'forecast', 'replenishment', 'space planning',
+  'investigation', 'compliance', 'security',
+  'loyalty', 'program', 'marketing',
+  'data analyst', 'research', 'insights',
+  'hrbp', 'compensation', 'benefits',
+  'space planning', 'planogram', 'category management'
 ];
 
-async function fetchJobDetail(jobId) {
+let browser = null;
+
+async function getBrowser() {
+  if (!browser) {
+    browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+  }
+  return browser;
+}
+
+async function fetchJobDetailWithPuppeteer(jobId) {
   const url = `${TALEO_BASE}/careersection/external/jobdetail.ftl?job=${jobId}`;
+  let page = null;
   
   try {
-    const res = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
-        "Accept": "text/html,application/xhtml+xml",
-        "Referer": `${TALEO_BASE}/careersection/external/jobsearch.ftl?lang=en`
-      }
+    const b = await getBrowser();
+    page = await b.newPage();
+    
+    await page.goto(url, { timeout: 20000 });
+    await new Promise(r => setTimeout(r, 4000));
+    
+    const text = await page.evaluate(() => document.body.innerText());
+    const title = await page.evaluate(() => {
+      const h1 = document.querySelector('h1');
+      return h1 ? h1.innerText : '';
     });
     
-    if (!res.ok) return null;
+    await page.close();
     
-    const html = await res.text();
-    return html;
+    return { text, title, url, isExpired: text.includes('no longer available') || text.includes('404') };
   } catch (err) {
-    console.log(`Error fetching job ${jobId}: ${err.message}`);
-    return null;
+    if (page) await page.close();
+    return { text: '', title: '', url, isExpired: true, error: err.message };
   }
 }
 
-function extractTagsFromHtml(html, title) {
+function extractTagsFromText(text, title) {
   const tags = new Set();
-  const lowerHtml = html.toLowerCase();
+  const lowerText = text.toLowerCase();
   const lowerTitle = title.toLowerCase();
   
   for (const skill of SKILL_KEYWORDS) {
-    if (lowerTitle.includes(skill) || lowerHtml.includes(skill)) {
+    if (lowerTitle.includes(skill) || lowerText.includes(skill)) {
       tags.add(skill.toLowerCase());
     }
   }
   
-  return Array.from(tags).slice(0, 20);
+  const yearMatches = lowerText.match(/(\d+)-(\d+)\s*ani/gi) || lowerText.match(/minimum\s*(\d+)\s*years/gi);
+  if (yearMatches) {
+    yearMatches.forEach(m => {
+      const years = m.match(/(\d+)/g);
+      if (years) tags.add(`${years[0]}-ani`);
+    });
+  }
+  
+  if (lowerText.includes('bachelor')) tags.add('bachelor');
+  if (lowerText.includes('master')) tags.add('master');
+  if (lowerText.includes('internship')) tags.add('internship');
+  if (lowerText.includes('part-time') || lowerText.includes('part time')) tags.add('part-time');
+  if (lowerText.includes('remote')) tags.add('remote');
+  if (lowerText.includes('hybrid')) tags.add('hybrid');
+  
+  const salaryMatch = lowerText.match(/(\d{3,4})\s*-\s*(\d{3,4})\s*(ron|eur|lei)/i);
+  
+  return {
+    tags: Array.from(tags).slice(0, 20),
+    salary: salaryMatch ? `${salaryMatch[1]}-${salaryMatch[2]} ${salaryMatch[3].toUpperCase()}` : undefined
+  };
+}
+
+async function fetchJobDetail(jobId) {
+  return fetchJobDetailWithPuppeteer(jobId);
 }
 
 async function fetchJobsPage() {
@@ -207,11 +255,19 @@ async function scrapeAllListings(testOnlyOnePage = false) {
     for (const job of jobs) {
       if (!seenUrls.has(job.url)) {
         job.tags = [];
+        job.salary = undefined;
+        job.status = 'scraped';
         
         if (job.jobId) {
-          const detailHtml = await fetchJobDetail(job.jobId);
-          if (detailHtml) {
-            job.tags = extractTagsFromHtml(detailHtml, job.title);
+          const detail = await fetchJobDetail(job.jobId);
+          if (detail && !detail.isExpired && detail.text) {
+            const extracted = extractTagsFromText(detail.text, job.title);
+            job.tags = extracted.tags;
+            job.salary = extracted.salary;
+            job.status = 'verified';
+          } else if (detail && detail.isExpired) {
+            console.log(`  Job ${job.jobId} is EXPIRED - skipping`);
+            continue;
           }
         }
         
@@ -250,8 +306,9 @@ function mapToJobModel(rawJob, cif, companyName = COMPANY_NAME) {
     location: rawJob.location?.length > 0 ? rawJob.location : undefined,
     tags: rawJob.tags?.length > 0 ? rawJob.tags : undefined,
     workmode: rawJob.workmode || undefined,
+    salary: rawJob.salary || undefined,
     date: now,
-    status: "scraped"
+    status: rawJob.status || "scraped"
   };
 
   Object.keys(job).forEach((k) => job[k] === undefined && delete job[k]);
@@ -361,8 +418,19 @@ async function main() {
   }
 }
 
-export { parseApiJobs, mapToJobModel, transformJobsForSOLR };
+export { parseApiJobs, mapToJobModel, transformJobsForSOLR, getBrowser, closeBrowser };
+
+async function closeBrowser() {
+  if (browser) {
+    await browser.close();
+    browser = null;
+  }
+}
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  main();
+  main().then(() => closeBrowser()).catch(async err => {
+    console.error("Scraper failed:", err);
+    await closeBrowser();
+    process.exit(1);
+  });
 }
