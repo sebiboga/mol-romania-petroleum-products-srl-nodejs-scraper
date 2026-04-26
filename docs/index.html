@@ -131,7 +131,7 @@
         const vData = await vRes.json();
         document.getElementById('verifiedCount').textContent = vData.response.numFound;
         
-        document.getElementById('lastRun').textContent = new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('lastRun').textContent = new Date().toLocaleString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         
         // Load jobs list
         const jobsList = document.getElementById('jobsListContent');
@@ -144,7 +144,7 @@
       } catch(e) {
         document.getElementById('jobsCount').textContent = '9';
         document.getElementById('verifiedCount').textContent = '9';
-        document.getElementById('lastRun').textContent = new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('lastRun').textContent = new Date().toLocaleString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
       }
     }
     loadStats();
