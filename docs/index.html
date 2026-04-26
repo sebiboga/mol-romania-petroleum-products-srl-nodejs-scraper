@@ -186,46 +186,10 @@
   </div>
 
   <script>
-    const CIF = '7745470';
-    const SOLR_URL = 'https://solr.peviitor.ro/solr/job';
-    
-    async function getJobCount() {
-      try {
-        const auth = btoa('solr:SolrRocks');
-        const res = await fetch(`${SOLR_URL}/select?q=cif:${CIF}&rows=1`, {
-          headers: { 'Authorization': `Basic ${auth}` }
-        });
-        const data = await res.json();
-        return data.response.numFound;
-      } catch { return 0; }
-    }
-    
-    async function getVerifiedCount() {
-      try {
-        const auth = btoa('solr:SolrRocks');
-        const res = await fetch(`${SOLR_URL}/select?q=cif:${CIF}%20AND%20status:verified&rows=1`, {
-          headers: { 'Authorization': `Basic ${auth}` }
-        });
-        const data = await res.json();
-        return data.response.numFound;
-      } catch { return 0; }
-    }
-    
-    async function loadStats() {
-      const total = await getJobCount();
-      const verified = await getVerifiedCount();
-      
-      document.getElementById('jobsCount').textContent = total;
-      document.getElementById('verifiedCount').textContent = verified;
-      document.getElementById('lastRun').textContent = new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' });
-    }
-    
-    async function runScraper() {
-      window.open('https://github.com/sebiboga/mol-romania-petroleum-products-srl-nodejs-scraper/actions/workflows/scrape.yml', '_blank');
-    }
-    
-    loadStats();
-    setInterval(loadStats, 60000);
+    // Static values - updated from SOLR
+    document.getElementById('jobsCount').textContent = '9';
+    document.getElementById('verifiedCount').textContent = '6';
+    document.getElementById('lastRun').textContent = new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' });
   </script>
 </body>
 </html>
