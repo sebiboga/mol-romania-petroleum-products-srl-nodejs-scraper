@@ -1,0 +1,30 @@
+{
+  "validatedAt": "2026-04-26T00:00:00.000Z",
+  "source": "targetare.ro",
+  "brand": "MOL",
+  "anaf": {
+    "cui": 7745470,
+    "name": "MOL ROMANIA PETROLEUM PRODUCTS SRL",
+    "address": "MUNICIPIUL CLUJ-NAPOCA, BLD. 21 DECEMBRIE 1989, NR.77, ET.1, CAM. C.1.1",
+    "registrationNumber": "J2000000729127",
+    "postalCode": "400604",
+    "caenCode": "4730",
+    "registrationDate": "1995-10-02",
+    "legalForm": "SOCIETATE COMERCIALA CU RASPUNDERE LIMITATA",
+    "vatRegistered": true,
+    "splitVat": true,
+    "status": "Funcțiune"
+  },
+  "summary": {
+    "company": "MOL ROMANIA PETROLEUM PRODUCTS SRL",
+    "cif": "7745470",
+    "active": true,
+    "address": "Jud. Cluj, Mun. Cluj-Napoca, Bld. 21 Decembrie 1989, Nr.77, Camera C.1.1, Cladirea C-D The Office, Et.1",
+    "registrationNumber": "J2000000729127",
+    "caenCode": "4730",
+    "vatRegistered": true,
+    "employees": 2787,
+    "revenue2024": "9,566,728,361 RON",
+    "profit2024": "166,069,540 RON"
+  }
+}
