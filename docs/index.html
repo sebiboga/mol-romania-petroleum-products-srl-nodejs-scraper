@@ -53,6 +53,12 @@
       cursor: pointer; width: 100%; transition: transform 0.2s;
     }
     .btn:hover { transform: translateY(-2px); }
+    .jobs-list { margin-top: 20px; }
+    .jobs-list h3 { color: #333; margin-bottom: 10px; }
+    .jobs-list ul { list-style: none; }
+    .jobs-list li { padding: 8px 0; border-bottom: 1px solid #eee; }
+    .jobs-list a { color: #ff6b35; text-decoration: none; }
+    .jobs-list a:hover { text-decoration: underline; }
     .footer { margin-top: 30px; text-align: center; color: #999; font-size: 0.9em; }
     .footer a { color: #ff6b35; text-decoration: none; }
   </style>
@@ -93,6 +99,11 @@
       ▶ Rulează Scraper
     </button>
     
+    <div class="jobs-list" id="jobsList">
+      <h3>Job-uri disponibile:</h3>
+      <ul id="jobsListContent"></ul>
+    </div>
+    
     <div class="footer">
       <a href="https://github.com/sebiboga/mol-romania-petroleum-products-srl-nodejs-scraper">GitHub</a> •
       <a href="https://sebiboga.github.io/mol-romania-petroleum-products-srl-nodejs-scraper/">Dashboard</a>
@@ -121,6 +132,15 @@
         document.getElementById('verifiedCount').textContent = vData.response.numFound;
         
         document.getElementById('lastRun').textContent = new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' });
+        
+        // Load jobs list
+        const jobsList = document.getElementById('jobsListContent');
+        jobsList.innerHTML = '';
+        data.response.docs.forEach(job => {
+          const li = document.createElement('li');
+          li.innerHTML = `<a href="${job.url}" target="_blank">${job.job_title}</a>`;
+          jobsList.appendChild(li);
+        });
       } catch(e) {
         document.getElementById('jobsCount').textContent = '9';
         document.getElementById('verifiedCount').textContent = '9';
