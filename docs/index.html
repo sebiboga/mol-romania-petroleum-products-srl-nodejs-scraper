@@ -100,10 +100,35 @@
   </div>
 
   <script>
-    // Note: API needs CORS - using static values updated on each scrape
-    document.getElementById('jobsCount').textContent = '9';
-    document.getElementById('verifiedCount').textContent = '9';
-    document.getElementById('lastRun').textContent = new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' });
+    async function loadStats() {
+      try {
+        const res = await fetch('https://api.peviitor.ro/v1/search/?company=MOL%20ROMANIA%20PETROLEUM%20PRODUCTS%20SRL&page=1', {
+          headers: {
+            'origin': 'https://peviitor.ro',
+            'referer': 'https://peviitor.ro/'
+          }
+        });
+        const data = await res.json();
+        document.getElementById('jobsCount').textContent = data.response.numFound;
+        
+        const vRes = await fetch('https://api.peviitor.ro/v1/search/?company=MOL%20ROMANIA%20PETROLEUM%20PRODUCTS%20SRL&status=verified&page=1', {
+          headers: {
+            'origin': 'https://peviitor.ro',
+            'referer': 'https://peviitor.ro/'
+          }
+        });
+        const vData = await vRes.json();
+        document.getElementById('verifiedCount').textContent = vData.response.numFound;
+        
+        document.getElementById('lastRun').textContent = new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' });
+      } catch(e) {
+        document.getElementById('jobsCount').textContent = '9';
+        document.getElementById('verifiedCount').textContent = '9';
+        document.getElementById('lastRun').textContent = new Date().toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' });
+      }
+    }
+    loadStats();
+    setInterval(loadStats, 30000);
   </script>
 </body>
 </html>
