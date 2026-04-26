@@ -189,6 +189,31 @@
     .jobs-list a:hover {
       text-decoration: underline;
     }
+    .company-info {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      width: 100%;
+    }
+    .company-info h3 {
+      color: #333;
+      margin-bottom: 15px;
+    }
+    .company-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .company-details .detail-item {
+      background: #fff;
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 0.9em;
+    }
+    .company-details .detail-item strong {
+      color: #e08d21;
+    }
     .footer {
       margin-top: 30px;
       text-align: center;
@@ -258,6 +283,11 @@
           </ul>
         </div>
         
+        <div class="company-info" id="companyInfo">
+          <h3>Despre companie:</h3>
+          <div class="company-details"></div>
+        </div>
+        
         <a class="btn" href="https://github.com/sebiboga/mol-romania-petroleum-products-srl-nodejs-scraper/actions/workflows/scrape.yml" target="_blank">
           ▶ Rulează Scraper
         </a>
@@ -309,6 +339,25 @@
           li.innerHTML = `<a href="${job.url}" target="_blank">${job.job_title}</a>`;
           jobsList.appendChild(li);
         });
+        
+        const cRes = await fetch('https://api.peviitor.ro/v1/company/?cif=7745470', {
+          headers: {
+            'origin': 'https://peviitor.ro',
+            'referer': 'https://peviitor.ro/'
+          }
+        });
+        const cData = await cRes.json();
+        const comp = cData.company;
+        const detailsDiv = document.querySelector('.company-details');
+        detailsDiv.innerHTML = `
+          <div class="detail-item"><strong>CIF:</strong> ${comp.id}</div>
+          <div class="detail-item"><strong>Brand:</strong> ${comp.brand}</div>
+          <div class="detail-item"><strong>Status:</strong> ${comp.status}</div>
+          <div class="detail-item"><strong>Orașe:</strong> ${comp.location.join(', ')}</div>
+          <div class="detail-item"><strong>Website:</strong> <a href="${comp.website[0]}" target="_blank">${comp.website[0]}</a></div>
+          <div class="detail-item"><strong>Career:</strong> <a href="${comp.career[0]}" target="_blank">${comp.career[0]}</a></div>
+          <div class="detail-item"><strong>Ultimul scrape:</strong> ${comp.lastScraped}</div>
+        `;
       } catch(e) {
         document.getElementById('jobsCount').textContent = '9';
         document.getElementById('verifiedCount').textContent = '9';
