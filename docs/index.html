@@ -278,19 +278,19 @@
   <script>
     async function loadStats() {
       try {
-        const res = await fetch('https://api.peviitor.ro/v1/search/?company=MOL%20ROMANIA%20PETROLEUM%20PRODUCTS%20SRL', {
+        const res = await fetch('https://api.peviitor.ro/v1/search/?company=MOL%20ROMANIA%20PETROLEUM%20PRODUCTS%20SRL&page=1', {
           headers: {
-            'Origin': 'https://sebiboga.github.io',
-            'Referer': 'https://peviitor.ro/'
+            'origin': 'https://peviitor.ro',
+            'referer': 'https://peviitor.ro/'
           }
         });
         const data = await res.json();
         document.getElementById('jobsCount').textContent = data.response.numFound;
         
-        const vRes = await fetch('https://api.peviitor.ro/v1/company/', {
+        const vRes = await fetch('https://api.peviitor.ro/v1/search/?company=MOL%20ROMANIA%20PETROLEUM%20PRODUCTS%20SRL&status=verified&page=1', {
           headers: {
-            'Origin': 'https://sebiboga.github.io',
-            'Referer': 'https://peviitor.ro/'
+            'origin': 'https://peviitor.ro',
+            'referer': 'https://peviitor.ro/'
           }
         });
         const vData = await vRes.json();
