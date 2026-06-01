@@ -46,7 +46,4 @@ delete.json
 # Credentials (NEVER commit these)
 *.pem
 *.key
-credentials.jsonnode_modules/
-.env
-.env.local
-*.log
+credentials.json

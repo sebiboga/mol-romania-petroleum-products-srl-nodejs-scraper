@@ -2,7 +2,7 @@ import fetch from "node-fetch";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { validateAndGetCompany } from "./company.js";
-import { querySOLR, deleteJobByUrl, upsertJobs } from "./solr.js";
+import { querySOLR, deleteJobByUrl, upsertJobs, upsertCompany } from "./solr.js";
 import { scrapeTaleo, closeBrowser as closeTaleoBrowser } from "./src/sources/taleo.js";
 import { scrapeJobradar24 } from "./src/sources/jobradar24.js";
 import { scrapeLinkedIn, closeBrowser as closeLinkedInBrowser } from "./src/sources/linkedin.js";
@@ -125,6 +125,22 @@ async function main() {
     const { company, cif } = await validateAndGetCompany();
     COMPANY_NAME = company;
     const localCif = cif;
+
+    try {
+      await upsertCompany({
+        id: cif,
+        company,
+        brand: "MOL",
+        status: "activ",
+        location: ["Cluj-Napoca"],
+        website: ["https://www.molromania.ro"],
+        career: ["https://molgroup.taleo.net/careersection/external/jobsearch.ftl?lang=en"],
+        lastScraped: new Date().toISOString().split('T')[0],
+        scraperFile: "https://raw.githubusercontent.com/sebiboga/mol-romania-petroleum-products-srl-nodejs-scraper/master/.github/workflows/scrape.yml"
+      });
+    } catch (err) {
+      console.log(`Note: Could not upsert company to SOLR core: ${err.message}`);
+    }
 
     console.log("=== Step 3: Scrape jobs from all sources ===");
     const rawJobs = await scrapeAllSources(testOnlyOnePage);
