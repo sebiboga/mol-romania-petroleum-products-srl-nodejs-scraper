@@ -43,4 +43,7 @@ node --experimental-vm-modules node_modules/jest/bin/jest.js --testPathPattern=e
 - `demoanaf.js` — CLI wrapper around src/anaf.js
 - `company.js` — company validation (ANAF + Peviitor + SOLR)
 - `solr.js` — SOLR operations
-- `index.js` — main scraper orchestrator (Taleo API + Puppeteer)
+- `index.js` — main scraper orchestrator (Taleo + Jobradar24 + LinkedIn)
+- `src/sources/taleo.js` — Taleo REST API scraper
+- `src/sources/jobradar24.js` — Jobradar24 scraper
+- `src/sources/linkedin.js` — Puppeteer LinkedIn scraper
