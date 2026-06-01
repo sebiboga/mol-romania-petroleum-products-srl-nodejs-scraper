@@ -18,6 +18,7 @@ Pentru lista completă de verificare, vezi [SYNC-CHECKLIST.md](SYNC-CHECKLIST.md
 |--------|------|-----|
 | CIF | `33159615` | `7745470` |
 | Company | `EPAM SYSTEMS INTERNATIONAL SRL` | `MOL ROMANIA PETROLEUM PRODUCTS SRL` |
-| Sursă job-uri | API JSON (careers.epam.com) | Taleo REST API (molgroup.taleo.net) |
+| Sursă job-uri | API JSON (careers.epam.com) | Taleo + Jobradar24 + LinkedIn |
 | `src/anaf.js` | Da (modular) | Da (modular, sincronizat) |
-| Puppeteer | Nu (API JSON direct) | Da (pentru detalii job) |
+| Puppeteer | Nu (API JSON direct) | Da (LinkedIn + detalii Taleo) |
+| SOLR company core | Da (`upsertCompany`) | Da (`upsertCompany`) |
