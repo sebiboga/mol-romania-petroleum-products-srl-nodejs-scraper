@@ -9,7 +9,7 @@
 import fetch from "node-fetch";
 import fs from "fs";
 import { querySOLR, deleteJobsByCIF } from "./solr.js";
-import { getCompanyFromANAF, searchCompany, getCompanyFromANAFWithFallback } from "./demoanaf.js";
+import { getCompanyFromANAF, searchCompany, getCompanyFromANAFWithFallback } from "./src/anaf.js";
 
 const Peviitor_API_URL = "https://api.peviitor.ro/v1/company/";
 const COMPANY_BRAND = "MOL";

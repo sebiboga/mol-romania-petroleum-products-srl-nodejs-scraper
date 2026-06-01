@@ -1,10 +1,3 @@
-/**
- * MOL Job Validator - Check and remove expired jobs
- * 
- * Validates all MOL jobs from peviitor API and deletes expired (404) ones from SOLR.
- * Run: node tests/validate-mol-jobs.js
- */
-
 import fetch from "node-fetch";
 
 const SOLR_URL = "https://solr.peviitor.ro/solr/job/update";
@@ -14,7 +7,7 @@ const COMPANY_NAME = "MOL ROMANIA PETROLEUM PRODUCTS SRL";
 async function getJobs() {
   const jobs = [];
   let page = 1;
-  
+
   while (true) {
     const res = await fetch(
       `https://api.peviitor.ro/v1/search/?company=${encodeURIComponent(COMPANY_NAME)}&page=${page}`,
@@ -27,7 +20,7 @@ async function getJobs() {
     );
     const data = await res.json();
     if (data.response.docs.length === 0) break;
-    
+
     jobs.push(...data.response.docs);
     page++;
   }
@@ -59,9 +52,9 @@ async function deleteJobFromSolr(url) {
     headers: {
       Authorization: "Basic " + Buffer.from(AUTH).toString("base64"),
       "Content-Type": "application/json",
-      "User-Agent": "Mozilla/5.0"
+      "User-Agent": "job_seeker_ro_spider"
     },
-    body: deleteQuery,
+    body: deleteQuery
   });
 
   console.log(`Delete response status: ${res.status}`);
@@ -70,24 +63,24 @@ async function deleteJobFromSolr(url) {
 
 async function main(args) {
   const dryRun = args.includes("--dry-run") || !args.includes("--delete");
-  
+
   console.log("=".repeat(50));
   console.log("MOL Job Validator");
   console.log("=".repeat(50));
   console.log(`Mode: ${dryRun ? "DRY RUN (no changes)" : "LIVE (will delete expired)"}\n`);
-  
+
   const jobs = await getJobs();
   console.log(`Total jobs found in API: ${jobs.length}\n`);
-  
+
   let active = 0;
   let expired = 0;
   let errors = 0;
   const expiredJobs = [];
-  
+
   for (let i = 0; i < jobs.length; i++) {
     const job = jobs[i];
     const result = await checkUrl(job.url);
-    
+
     if (result.ok) {
       console.log(`✅ ${job.job_title.substring(0, 50)}`);
       active++;
@@ -100,14 +93,14 @@ async function main(args) {
       console.log(`⚠️ STATUS ${result.status} - ${job.job_title.substring(0, 40)}`);
       errors++;
     }
-    
+
     if ((i + 1) % 20 === 0) {
       console.log(`\n--- Progress: ${i + 1}/${jobs.length} ---\n`);
     }
-    
+
     await new Promise((r) => setTimeout(r, 300));
   }
-  
+
   console.log("\n" + "=".repeat(50));
   console.log("RESULTS");
   console.log("=".repeat(50));
@@ -115,22 +108,22 @@ async function main(args) {
   console.log(`Expired (404): ${expired}`);
   console.log(`Other errors: ${errors}`);
   console.log(`Total: ${jobs.length}`);
-  
+
   if (expired > 0) {
     console.log("\n" + "=".repeat(50));
     console.log("EXPIRED JOBS TO DELETE:");
     console.log("=".repeat(50));
-    
+
     for (const job of expiredJobs) {
       console.log(`- ${job.job_title}`);
       console.log(`  ${job.url}`);
     }
-    
+
     if (!dryRun) {
       console.log("\n" + "=".repeat(50));
       console.log("DELETING EXPIRED JOBS FROM SOLR...");
       console.log("=".repeat(50));
-      
+
       let deleted = 0;
       for (const job of expiredJobs) {
         const ok = await deleteJobFromSolr(job.url);
@@ -142,13 +135,13 @@ async function main(args) {
         }
         await new Promise((r) => setTimeout(r, 500));
       }
-      
+
       console.log(`\n✅ Deleted ${deleted}/${expiredJobs.length} expired jobs`);
     } else {
       console.log(`\n⚠️ Dry run - no jobs deleted. Run with --delete to actually remove.`);
     }
   }
-  
+
   process.exit(0);
 }
 
