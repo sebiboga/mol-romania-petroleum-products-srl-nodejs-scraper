@@ -1,7 +1,7 @@
 # SYNC-CHECKLIST.md — Verificare sincronizare cu EPAM
 
 Când EPAM (șablonul principal) primește actualizări, verifică dacă acestea
-trebuie propagate în MOL.
+trebuie propagate în MOL. Vezi [FROM-EPAM.md](FROM-EPAM.md) pentru context.
 
 ## Checklist
 
