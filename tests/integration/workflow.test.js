@@ -110,9 +110,6 @@ describe('SCRAPER WORKFLOW INTEGRATION', () => {
 
       mockFetch
         .mockResolvedValueOnce(makeSolrResponse(0, []))
-        .mockResolvedValueOnce(makeAnafSearchResponse([
-          { cui: 7745470, name: 'MOL ROMANIA PETROLEUM PRODUCTS SRL', statusLabel: 'Funcțiune' }
-        ]))
         .mockResolvedValueOnce(makeAnafCompanyResponse(MOL_ANAF_RECORD))
         .mockResolvedValueOnce(makeSolrResponse(0, []))
         .mockResolvedValueOnce(makeSolrResponse(0, []))

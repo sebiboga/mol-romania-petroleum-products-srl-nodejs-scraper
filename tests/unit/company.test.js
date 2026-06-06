@@ -109,11 +109,8 @@ describe('company.js', () => {
   });
 
   describe('getCompanyData (no cache)', () => {
-    it('should find MOL via ANAF search and return company data', async () => {
+    it('should find MOL via hardcoded CIF and return company data', async () => {
       mockFetch
-        .mockResolvedValueOnce(anafSearchResponse([
-          { cui: 7745470, name: 'MOL ROMANIA PETROLEUM PRODUCTS SRL', statusLabel: 'Funcțiune' }
-        ]))
         .mockResolvedValueOnce(anafCompanyResponse(MOL_ANAF_RECORD));
 
       const result = await company.getCompanyData();
@@ -125,10 +122,12 @@ describe('company.js', () => {
       expect(result.anafData.name).toBe('MOL ROMANIA PETROLEUM PRODUCTS SRL');
     });
 
-    it('should pick first active company when no exact match', async () => {
+    it('should fall back to brand search when CIF lookup fails', async () => {
       mockFetch
+        .mockResolvedValueOnce(errorResponse(500))
+        .mockResolvedValueOnce(errorResponse(500))
+        .mockResolvedValueOnce(errorResponse(500))
         .mockResolvedValueOnce(anafSearchResponse([
-          { cui: 11111111, name: 'SOME OTHER COMPANY SRL', statusLabel: 'Radiată' },
           { cui: 7745470, name: 'MOL ROMANIA PETROLEUM PRODUCTS SRL', statusLabel: 'Funcțiune' }
         ]))
         .mockResolvedValueOnce(anafCompanyResponse(MOL_ANAF_RECORD));
@@ -140,34 +139,36 @@ describe('company.js', () => {
     });
 
     it('should throw when no companies found', async () => {
-      mockFetch.mockResolvedValueOnce(anafSearchResponse([]));
+      mockFetch
+        .mockResolvedValueOnce(errorResponse(500))
+        .mockResolvedValueOnce(errorResponse(500))
+        .mockResolvedValueOnce(errorResponse(500))
+        .mockResolvedValueOnce(anafSearchResponse([]));
 
       await expect(company.getCompanyData()).rejects.toThrow('No companies found');
     });
 
-    it('should throw when no active company found', async () => {
-      mockFetch.mockResolvedValueOnce(anafSearchResponse([
-        { cui: 11111111, name: 'MOL SOMETHING SRL', statusLabel: 'Radiată' }
-      ]));
+    it('should throw when no active company found in fallback search', async () => {
+      mockFetch
+        .mockResolvedValueOnce(errorResponse(500))
+        .mockResolvedValueOnce(errorResponse(500))
+        .mockResolvedValueOnce(errorResponse(500))
+        .mockResolvedValueOnce(anafSearchResponse([
+          { cui: 11111111, name: 'MOL SOMETHING SRL', statusLabel: 'Radiată' }
+        ]));
 
       await expect(company.getCompanyData()).rejects.toThrow('No active company found');
     });
 
-    it('should throw when ANAF returns no data', async () => {
+    it('should throw when ANAF returns no data via CIF', async () => {
       mockFetch
-        .mockResolvedValueOnce(anafSearchResponse([
-          { cui: 7745470, name: 'MOL ROMANIA PETROLEUM PRODUCTS SRL', statusLabel: 'Funcțiune' }
-        ]))
         .mockResolvedValueOnce(anafCompanyResponse(null));
 
       await expect(company.getCompanyData()).rejects.toThrow('No data from ANAF');
     });
 
-    it('should throw when ANAF returns no company name', async () => {
+    it('should throw when ANAF returns no company name via CIF', async () => {
       mockFetch
-        .mockResolvedValueOnce(anafSearchResponse([
-          { cui: 7745470, name: 'MOL ROMANIA PETROLEUM PRODUCTS SRL', statusLabel: 'Funcțiune' }
-        ]))
         .mockResolvedValueOnce(anafCompanyResponse({ cui: 7745470, name: null }));
 
       await expect(company.getCompanyData()).rejects.toThrow('ANAF returned no company name');
@@ -201,9 +202,6 @@ describe('company.js', () => {
   describe('validateAndGetCompany', () => {
     it('should return company data with status active', async () => {
       mockFetch
-        .mockResolvedValueOnce(anafSearchResponse([
-          { cui: 7745470, name: 'MOL ROMANIA PETROLEUM PRODUCTS SRL', statusLabel: 'Funcțiune' }
-        ]))
         .mockResolvedValueOnce(anafCompanyResponse(MOL_ANAF_RECORD))
         .mockResolvedValueOnce(solrResponse(5, [
           { url: 'https://test.com/1', title: 'Job 1' },
@@ -224,9 +222,6 @@ describe('company.js', () => {
       const inactiveRecord = { ...MOL_ANAF_RECORD, inactive: true };
 
       mockFetch
-        .mockResolvedValueOnce(anafSearchResponse([
-          { cui: 7745470, name: 'MOL ROMANIA PETROLEUM PRODUCTS SRL', statusLabel: 'Funcțiune' }
-        ]))
         .mockResolvedValueOnce(anafCompanyResponse(inactiveRecord))
         .mockResolvedValueOnce(solrResponse(0, []));
 

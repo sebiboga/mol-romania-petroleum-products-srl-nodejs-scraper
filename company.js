@@ -13,6 +13,7 @@ import { getCompanyFromANAF, searchCompany, getCompanyFromANAFWithFallback } fro
 
 const Peviitor_API_URL = "https://api.peviitor.ro/v1/company/";
 const COMPANY_BRAND = "MOL";
+const COMPANY_CIF = "7745470";
 
 export function getCompanyBrand() {
   return COMPANY_BRAND;
@@ -135,34 +136,26 @@ export async function getCompanyData() {
   const cachedData = loadCachedCompanyData();
   
   if (!cachedData?.summary?.cif) {
-    console.log(`Searching for company with brand: ${COMPANY_BRAND}`);
-    const searchResults = await searchCompany(COMPANY_BRAND);
-    
-    if (!searchResults || searchResults.length === 0) {
-      throw new Error(`No companies found for brand: ${COMPANY_BRAND}`);
-    }
-    
-    const exactMatch = searchResults.find(c => 
-      (c.name.toUpperCase().startsWith(COMPANY_BRAND.toUpperCase() + " ") || 
-       c.name.toUpperCase().includes(" " + COMPANY_BRAND.toUpperCase() + " ")) &&
-      c.statusLabel === "Funcțiune"
-    );
-    
-    if (!exactMatch) {
-      console.log("No exact match with 'Funcțiune' status, trying first active company...");
-      const activeMatch = searchResults.find(c => c.statusLabel === "Funcțiune");
-      if (!activeMatch) {
-        throw new Error(`No active company found for brand: ${COMPANY_BRAND}`);
+    console.log(`Using known CIF: ${COMPANY_CIF}`);
+    console.log(`Fetching company details for CIF: ${COMPANY_CIF}`);
+    let anafData;
+    try {
+      anafData = await getCompanyFromANAFWithFallback(COMPANY_CIF, cachedData?.anaf);
+    } catch (e) {
+      console.log(`Failed to fetch company by CIF ${COMPANY_CIF}, trying brand search...`);
+      const searchResults = await searchCompany(COMPANY_BRAND);
+      if (!searchResults || searchResults.length === 0) {
+        throw new Error(`No companies found for brand: ${COMPANY_BRAND}`);
       }
-      var selectedCIF = activeMatch.cui;
-      console.log(`Selected: ${activeMatch.name} (CIF: ${selectedCIF})`);
-    } else {
-      var selectedCIF = exactMatch.cui;
-      console.log(`Found exact match: ${exactMatch.name} (CIF: ${selectedCIF})`);
+      const exactMatch = searchResults.find(c => 
+        (c.name.toUpperCase().startsWith(COMPANY_BRAND.toUpperCase() + " ") || 
+         c.name.toUpperCase().includes(" " + COMPANY_BRAND.toUpperCase() + " ")) &&
+        c.statusLabel === "Funcțiune"
+      );
+      var selectedCIF = exactMatch ? exactMatch.cui : searchResults.find(c => c.statusLabel === "Funcțiune")?.cui;
+      if (!selectedCIF) throw new Error(`No active company found for brand: ${COMPANY_BRAND}`);
+      anafData = await getCompanyFromANAFWithFallback(selectedCIF, cachedData?.anaf);
     }
-    
-    console.log(`Fetching company details for CIF: ${selectedCIF}`);
-    const anafData = await getCompanyFromANAFWithFallback(selectedCIF, cachedData?.anaf);
     
     if (!anafData) {
       throw new Error("No data from ANAF and no cache - cannot proceed with scraping");
