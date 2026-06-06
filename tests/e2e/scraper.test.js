@@ -34,7 +34,7 @@ describe('E2E: MOL Romania Scraper', () => {
     it('should have correct CIF for MOL Romania', () => {
       const cif = EXPECTED_CIF;
       expect(cif).toBe('7745470');
-      expect(cif).toMatch(/^\d{8}$/);
+      expect(cif).toMatch(/^\d{6,8}$/);
     });
 
     it('should have correct brand name', () => {
@@ -149,7 +149,7 @@ describe('E2E: MOL Romania Scraper', () => {
       };
 
       expect(testJob.url).toMatch(/^https?:\/\/.+/);
-      expect(testJob.cif).toMatch(/^\d{8}$/);
+      expect(testJob.cif).toMatch(/^\d{6,8}$/);
       expect(testJob.status).toBe('scraped');
       expect(testJob.company).toContain('MOL ROMANIA');
     });

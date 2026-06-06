@@ -9,7 +9,7 @@ jest.unstable_mockModule('node-fetch', () => ({
   default: mockFetch
 }));
 
-const COMPANY_JSON_PATH = 'company.json';
+const COMPANY_JSON_PATH = 'tmp/company.json';
 
 function backupCompanyJson() {
   if (fs.existsSync(COMPANY_JSON_PATH)) {
@@ -74,6 +74,7 @@ describe('SCRAPER WORKFLOW INTEGRATION', () => {
   let savedCompanyJson;
 
   beforeAll(async () => {
+    fs.mkdirSync("tmp", { recursive: true });
     process.env.SOLR_AUTH = 'test:test';
     savedCompanyJson = backupCompanyJson();
   });
@@ -108,10 +109,12 @@ describe('SCRAPER WORKFLOW INTEGRATION', () => {
       ];
 
       mockFetch
+        .mockResolvedValueOnce(makeSolrResponse(0, []))
         .mockResolvedValueOnce(makeAnafSearchResponse([
           { cui: 7745470, name: 'MOL ROMANIA PETROLEUM PRODUCTS SRL', statusLabel: 'Funcțiune' }
         ]))
         .mockResolvedValueOnce(makeAnafCompanyResponse(MOL_ANAF_RECORD))
+        .mockResolvedValueOnce(makeSolrResponse(0, []))
         .mockResolvedValueOnce(makeSolrResponse(0, []))
         .mockResolvedValueOnce({
           ok: true,

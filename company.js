@@ -88,6 +88,7 @@ function validateCompanyModel(data) {
 }
 
 function saveCompanyData(anafData, peviitorData) {
+  fs.mkdirSync("tmp", { recursive: true });
   const companyData = {
     validatedAt: new Date().toISOString(),
     source: "ANAF",
@@ -108,19 +109,19 @@ function saveCompanyData(anafData, peviitorData) {
     }
   };
   
-  fs.writeFileSync("company.json", JSON.stringify(companyData, null, 2), "utf-8");
-  console.log("\n✅ Saved company data to company.json");
+  fs.writeFileSync("tmp/company.json", JSON.stringify(companyData, null, 2), "utf-8");
+  console.log("\n✅ Saved company data to tmp/company.json");
   console.log("This file can be used to restore company details if SOLR data is lost.\n");
   
   return companyData;
 }
 
 function loadCachedCompanyData() {
-  if (fs.existsSync("company.json")) {
+  if (fs.existsSync("tmp/company.json")) {
     try {
-      const data = JSON.parse(fs.readFileSync("company.json", "utf-8"));
+      const data = JSON.parse(fs.readFileSync("tmp/company.json", "utf-8"));
       if (data?.anaf?.cui && data?.anaf?.name) {
-        console.log("Found cached company data in company.json");
+        console.log("Found cached company data in tmp/company.json");
         return data;
       }
     } catch (e) {

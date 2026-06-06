@@ -172,8 +172,8 @@ async function main() {
     const validCount = transformedPayload.jobs.filter(j => j.location).length;
     console.log(`📊 Jobs with valid Romanian locations: ${validCount}`);
 
-    fs.writeFileSync("jobs.json", JSON.stringify(transformedPayload, null, 2), "utf-8");
-    console.log("Saved jobs.json");
+    fs.writeFileSync("tmp/jobs.json", JSON.stringify(transformedPayload, null, 2), "utf-8");
+    console.log("Saved tmp/jobs.json");
 
     console.log("\n=== Step 4: Upsert jobs to SOLR ===");
     await upsertJobs(transformedPayload.jobs);
