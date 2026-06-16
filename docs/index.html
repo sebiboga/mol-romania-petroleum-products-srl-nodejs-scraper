@@ -244,7 +244,7 @@
     <div class="logo">
       <a href="https://peviitor.ro/" target="_blank">peviitor</a>
     </div>
-    <a href="https://github.com/sebiboga/mol-romania-petroleum-products-srl-nodejs-scraper/blob/main/README.md" target="_blank">Documentație</a>
+    <a href="https://github.com/sebiboga/mol-romania-petroleum-products-srl-nodejs-scraper/blob/main/docs/README.md" target="_blank">Documentație</a>
   </header>
 
   <div class="container">
@@ -302,7 +302,7 @@
 
   <footer class="footer">
     <a href="https://github.com/sebiboga/mol-romania-petroleum-products-srl-nodejs-scraper" target="_blank">GitHub</a> •
-    <a href="https://github.com/sebiboga/mol-romania-petroleum-products-srl-nodejs-scraper/blob/main/README.md" target="_blank">Documentație</a> •
+    <a href="https://github.com/sebiboga/mol-romania-petroleum-products-srl-nodejs-scraper/blob/main/docs/README.md" target="_blank">Documentație</a> •
     <a href="https://peviitor.ro/" target="_blank">peviitor.ro</a>
   </footer>
 
@@ -335,11 +335,28 @@
         
         const jobsList = document.getElementById('jobsListContent');
         jobsList.innerHTML = '';
-        data.response.docs.forEach(job => {
-          const li = document.createElement('li');
-          li.innerHTML = `<a href="${job.url}" target="_blank">${job.job_title}</a>`;
-          jobsList.appendChild(li);
-        });
+        
+        let page = 1;
+        let moreJobs = true;
+        while (moreJobs) {
+          const jobsRes = await fetch(`https://api.peviitor.ro/v1/search/?company=MOL%20ROMANIA%20PETROLEUM%20PRODUCTS%20SRL&page=${page}`, {
+            headers: {
+              'origin': 'https://peviitor.ro',
+              'referer': 'https://peviitor.ro/'
+            }
+          });
+          const jobsData = await jobsRes.json();
+          if (jobsData.response.docs.length === 0) {
+            moreJobs = false;
+          } else {
+            jobsData.response.docs.forEach(job => {
+              const li = document.createElement('li');
+              li.innerHTML = `<a href="${job.url}" target="_blank">${job.title}</a>`;
+              jobsList.appendChild(li);
+            });
+            page++;
+          }
+        }
         
         const cRes = await fetch('https://api.peviitor.ro/v1/company/?cif=7745470', {
           headers: {
