@@ -1,0 +1,11 @@
+{
+  "cif": "7745470",
+  "legalName": "MOL ROMANIA PETROLEUM PRODUCTS SRL",
+  "brand": "MOL",
+  "website": "https://www.molromania.ro",
+  "careerUrl": "https://molgroup.taleo.net/careersection/external/jobsearch.ftl?lang=en",
+  "apiBase": "https://molgroup.taleo.net",
+  "apiEndpoint": "/careersection/rest/jobboard/searchjobs",
+  "defaultLocation": "Cluj-Napoca",
+  "scraperFile": "https://raw.githubusercontent.com/sebiboga/mol-romania-petroleum-products-srl-nodejs-scraper/main/.github/workflows/scrape.yml"
+}
