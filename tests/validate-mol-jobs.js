@@ -82,15 +82,15 @@ async function main(args) {
     const result = await checkUrl(job.url);
 
     if (result.ok) {
-      console.log(`✅ ${job.job_title.substring(0, 50)}`);
+      console.log(`✅ ${(job.job_title || job.title || '').substring(0, 50)}`);
       active++;
     } else if (result.status === 404 || result.status === 0) {
-      console.log(`❌ EXPIRED (${result.status}) - ${job.job_title.substring(0, 40)}`);
+      console.log(`❌ EXPIRED (${result.status}) - ${(job.job_title || job.title || '').substring(0, 40)}`);
       console.log(`   URL: ${job.url}`);
       expiredJobs.push(job);
       expired++;
     } else {
-      console.log(`⚠️ STATUS ${result.status} - ${job.job_title.substring(0, 40)}`);
+      console.log(`⚠️ STATUS ${result.status} - ${(job.job_title || job.title || '').substring(0, 40)}`);
       errors++;
     }
 
@@ -115,7 +115,7 @@ async function main(args) {
     console.log("=".repeat(50));
 
     for (const job of expiredJobs) {
-      console.log(`- ${job.job_title}`);
+      console.log(`- ${job.job_title || job.title || 'Unknown'}`);
       console.log(`  ${job.url}`);
     }
 
@@ -128,10 +128,10 @@ async function main(args) {
       for (const job of expiredJobs) {
         const ok = await deleteJobFromSolr(job.url);
         if (ok) {
-          console.log(`🗑️ Deleted: ${job.job_title}`);
+          console.log(`🗑️ Deleted: ${job.job_title || job.title || 'Unknown'}`);
           deleted++;
         } else {
-          console.log(`❌ Failed to delete: ${job.job_title}`);
+          console.log(`❌ Failed to delete: ${job.job_title || job.title || 'Unknown'}`);
         }
         await new Promise((r) => setTimeout(r, 500));
       }
